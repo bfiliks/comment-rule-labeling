@@ -8,40 +8,35 @@ st.set_page_config(page_title="Comment Rule Labeling Tool", page_icon="favicon.p
 
 st.title("🧠 Comment Rule Labeling Tool")
 
-# 👋 Welcome Message
-st.markdown("""
-### 👋 Welcome, Annotators!
+# Sidebar Legend
+with st.sidebar.expander("📘 How to Use This Tool"):
+    st.markdown("""
+**Annotator Instructions:**
 
-This tool helps you **label, flag, and comment on YouTube comments** based on specific community rules.
-
-Please follow the steps below to begin:
-1. **Enter your annotator name** when prompted (this helps log your inputs).
-2. **Upload your CSV file** containing paired *rules* and *comments*.
-3. For each comment:
-   - Assign a **label**: `0` (not violating) or `1` (violates the rule).
-   - Optionally **flag** uncertain cases and leave a **note** for review.
-   - ➕ **Manually click the plus (+) sign beside “Index”** to go to the next comment-rule pair.
-4. Use the **“Download Labeled Data”** button to export your progress.
-
----
-
-Need help? Reach out to the team or [open an issue](https://github.com/bfiliks/comment-rule-labeling/issues).
+1. **Enter your annotator name** (used for tracking contributions).
+2. **Upload a CSV file** with paired *rules* and *comments*.
+3. For each item:
+   - Assign a **label**: `0` for NOT violating, `1` for VIOLATING.
+   - Optionally **flag** uncertain comments.
+   - Leave a **note** if needed.
+4. Click **Save** to store your labels.
+5. ➕ Use the **plus (+)** button beside the index to move to the next item.
+6. Click **Download** to export labeled data at any time.
 """)
 
-# --- USER LOGIN ---
+    st.markdown("[🌐 GitHub Repository](https://github.com/bfiliks/comment-rule-labeling)")
+
+# Annotator login
 if 'annotator' not in st.session_state:
-    st.sidebar.markdown("[🔗 View on GitHub](https://github.com/bfiliks/comment-rule-labeling)")
     st.session_state.annotator = st.text_input("Enter your annotator name to begin:")
     st.stop()
 
-# --- FILE UPLOAD ---
+# Upload CSV
 uploaded_file = st.file_uploader("📄 Upload your comment-rule pairs CSV", type="csv")
 
-# --- CACHE CSV CONTENT ---
 if uploaded_file and 'csv_data' not in st.session_state:
     st.session_state.csv_data = uploaded_file.read()
 
-# --- LOAD INTO DATAFRAME ONCE ---
 if 'csv_data' in st.session_state and 'df' not in st.session_state:
     df = pd.read_csv(io.StringIO(st.session_state.csv_data.decode("utf-8")))
     if 'label' not in df.columns: df['label'] = None
@@ -51,7 +46,6 @@ if 'csv_data' in st.session_state and 'df' not in st.session_state:
     if 'timestamp' not in df.columns: df['timestamp'] = ""
     st.session_state.df = df
 
-# --- MAIN ANNOTATION TOOL ---
 if 'df' in st.session_state:
     df = st.session_state.df
 
@@ -85,7 +79,7 @@ if 'df' in st.session_state:
         st.session_state.df = df
         st.success("Saved successfully.")
 
-    # --- PROGRESS BAR ---
+    # Progress bar
     total = len(df)
     completed = df['label'].notna().sum()
     progress = completed / total if total > 0 else 0
