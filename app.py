@@ -1,93 +1,76 @@
 
 import streamlit as st
 import pandas as pd
+import gspread
 import datetime
-import io
+from oauth2client.service_account import ServiceAccountCredentials
 
-st.set_page_config(page_title="Comment Rule Labeling Tool", page_icon="favicon.png", layout="wide")
+st.set_page_config(page_title="Google Sheets Sync Labeling Tool", layout="wide")
 
-st.title("🧠 Multi-Annotator Comment Rule Labeling Tool")
-
-# Sidebar Instructions
-with st.sidebar.expander("📘 Annotator Instructions"):
-    st.markdown("""
-**How to Use:**
-
-1. Enter your **annotator name** (e.g., `alice`, `bob`, `carla`).
-2. Upload the shared CSV.
-3. You will **only see rows you haven't labeled**.
-4. Label each comment as `0` (not violating) or `1` (violates the rule).
-5. Optionally **flag** or **comment**.
-6. Click **Save** and use the **+** to go to the next item.
-7. Click **Download** to save your progress.
-
-🧠 Other annotators' labels are tracked in separate columns.
-""")
+st.title("Comment Rule Labeling Tool (Google Sheets Sync)")
 
 # Annotator login
-annotator = st.sidebar.text_input("Enter your annotator name (e.g., alice, bob, carla):").strip().lower()
+annotator = st.sidebar.text_input("Enter your name to begin:").strip().lower()
 if not annotator:
     st.stop()
 
-# Upload file
-uploaded_file = st.file_uploader("📄 Upload shared comment-rule CSV", type="csv")
+# Authenticate and connect to Google Sheet
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name("gspread_credentials.json", scope)
+client = gspread.authorize(creds)
 
-if uploaded_file and 'csv_data' not in st.session_state:
-    st.session_state.csv_data = uploaded_file.read()
+sheet = client.open("CommentAnnotations").sheet1  # Replace with your actual sheet name
+data = sheet.get_all_records()
+df = pd.DataFrame(data)
 
-if 'csv_data' in st.session_state and 'df' not in st.session_state:
-    df = pd.read_csv(io.StringIO(st.session_state.csv_data.decode("utf-8")))
+# Ensure required columns exist
+for col in ["label", "flag", "comment", "annotator", "timestamp"]:
+    if col not in df.columns:
+        df[col] = None if col == "label" else ""
 
-    for col in [f'label_{annotator}', f'flag_{annotator}', f'comment_{annotator}', f'timestamp_{annotator}']:
-        if col not in df.columns:
-            if 'label' in col:
-                df[col] = None
-            elif 'flag' in col:
-                df[col] = False
-            else:
-                df[col] = ""
-    st.session_state.df = df
+# Progress info
+filtered = df[df["label"].isna()].reset_index(drop=True)
+total = len(df)
+completed = df["label"].notna().sum()
+progress = completed / total if total else 0
+st.progress(progress)
+st.markdown(f"**Progress:** {completed} / {total} labeled")
 
-if 'df' in st.session_state:
-    df = st.session_state.df
+if filtered.empty:
+    st.success("🎉 All comments have been labeled!")
+    st.stop()
 
-    # Filter to rows this annotator hasn't labeled yet
-    filtered = df[df[f'label_{annotator}'].isna()].reset_index(drop=True)
+if "current_index" not in st.session_state:
+    st.session_state.current_index = 0
 
-    if 'current_index' not in st.session_state:
-        st.session_state.current_index = 0
+index = st.number_input("Index", min_value=0, max_value=len(filtered)-1, value=st.session_state.current_index)
+st.session_state.current_index = index
 
-    if filtered.empty:
-        st.success("🎉 All comments have been labeled by you!")
-    else:
-        index = st.number_input("Index", min_value=0, max_value=len(filtered)-1, value=st.session_state.current_index)
-        st.session_state.current_index = index
-        row = filtered.iloc[index]
+row = filtered.iloc[index]
+st.subheader("📌 Rule")
+st.info(row["rule_text"])
 
-        st.subheader("📌 Rule")
-        st.info(row['rule_text'])
+st.subheader("💬 Comment")
+st.warning(row["text"])
 
-        st.subheader("💬 Comment")
-        st.warning(row['text'])
+label = st.radio("Label", [0, 1], horizontal=True)
+flag = st.checkbox("🚩 Flag this data?")
+comment = st.text_area("💬 Comment (optional)")
 
-        label = st.radio("Label", [0, 1], horizontal=True)
-        flag = st.checkbox("🚩 Flag this data?")
-        note = st.text_area("💬 Comment (optional)")
+if st.button("💾 Save"):
+    # Locate matching row in full df
+    full_index = df[(df["rule_text"] == row["rule_text"]) & (df["text"] == row["text"])].index[0]
+    df.at[full_index, "label"] = label
+    df.at[full_index, "flag"] = flag
+    df.at[full_index, "comment"] = comment
+    df.at[full_index, "annotator"] = annotator
+    df.at[full_index, "timestamp"] = datetime.datetime.now().isoformat()
 
-        if st.button("💾 Save"):
-            full_index = df[(df['rule_text'] == row['rule_text']) & (df['text'] == row['text'])].index[0]
-            df.at[full_index, f'label_{annotator}'] = label
-            df.at[full_index, f'flag_{annotator}'] = flag
-            df.at[full_index, f'comment_{annotator}'] = note
-            df.at[full_index, f'timestamp_{annotator}'] = datetime.datetime.now().isoformat()
-            st.session_state.df = df
-            st.success("Saved successfully!")
+    # Push updated row to Google Sheets
+    sheet.update(f"C{full_index+2}", str(label))       # label
+    sheet.update(f"D{full_index+2}", str(flag))        # flag
+    sheet.update(f"E{full_index+2}", comment)          # comment
+    sheet.update(f"F{full_index+2}", annotator)        # annotator
+    sheet.update(f"G{full_index+2}", df.at[full_index, "timestamp"])  # timestamp
 
-        total = len(df)
-        completed = df[f'label_{annotator}'].notna().sum()
-        progress = completed / total if total else 0
-        st.progress(progress)
-        st.markdown(f"**Progress:** {completed} / {total} labeled by `{annotator}`")
-
-        csv = df.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Download your labeled CSV", csv, f"{annotator}_labeled_output.csv", "text/csv")
+    st.success("Saved to Google Sheets!")
