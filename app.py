@@ -1,5 +1,11 @@
 
 import streamlit as st
+
+st.set_page_config(page_title="Comment Rule Labeling Tool", page_icon="favicon.png")
+
+st.title("🧠 Comment Rule Labeling Tool")
+st.write("Welcome! Upload your dataset and start annotating.")
+
 import pandas as pd
 import datetime
 
