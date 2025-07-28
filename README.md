@@ -48,6 +48,12 @@
 
 ---
 
+## 🧩 System Architecture
+
+![System Design](./assets/comment_labeling_rulesSD.png)
+
+This architecture illustrates the interaction between the annotator interface, Streamlit application logic, Google Sheets backend, and supporting configuration and infrastructure layers.
+
 ## 🧪 Local Setup
 
 ```bash
