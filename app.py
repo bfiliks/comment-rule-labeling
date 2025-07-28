@@ -4,7 +4,9 @@ import pandas as pd
 import datetime
 import io
 
-st.set_page_config(page_title="Multi-Annotator Comment Rule Labeling Tool", page_icon="🧠", layout="wide")
+# st.set_page_config(page_title="Multi-Annotator Comment Rule Labeling Tool", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Comment Rule Labeling Tool", page_icon="favicon.png", layout="wide")
+
 
 st.title("🧠 Multi-Annotator Comment Rule Labeling Tool")
 
