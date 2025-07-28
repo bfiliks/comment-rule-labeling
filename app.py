@@ -20,6 +20,7 @@ Please follow the steps below to begin:
 3. For each comment:
    - Assign a **label**: `0` (not violating) or `1` (violates the rule).
    - Optionally **flag** uncertain cases and leave a **note** for review.
+   - ➕ **Manually click the plus (+) sign beside “Index”** to go to the next comment-rule pair.
 4. Use the **“Download Labeled Data”** button to export your progress.
 
 ---
