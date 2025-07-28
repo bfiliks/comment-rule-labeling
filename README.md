@@ -1,3 +1,4 @@
+![Banner](./assets/streamlit_banner.png)
 
 # Comment Rule Labeling Tool
 
