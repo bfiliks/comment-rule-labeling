@@ -44,13 +44,20 @@ if 'annotator' not in st.session_state:
 # st.title("🧠 Comment Rule Labeling Tool (w/ Metadata)")
 uploaded_file = st.file_uploader("📄 Upload your comment-rule pairs CSV", type="csv")
 
-if uploaded_file:
-    df = pd.read_csv(uploaded_file)
-    if 'label' not in df.columns: df['label'] = None
-    if 'flag' not in df.columns: df['flag'] = False
-    if 'comment' not in df.columns: df['comment'] = ""
-    if 'annotator' not in df.columns: df['annotator'] = ""
-    if 'timestamp' not in df.columns: df['timestamp'] = ""
+if st.button("💾 Save"):
+    row_index = row.name
+    df.at[row_index, 'label'] = label
+    df.at[row_index, 'flag'] = flag
+    df.at[row_index, 'comment'] = note
+    df.at[row_index, 'annotator'] = st.session_state.annotator
+    df.at[row_index, 'timestamp'] = datetime.datetime.now().isoformat()
+    st.success("Saved successfully.")
+
+    # 🚀 Auto-advance to next index
+    if st.session_state.current_index < len(filtered) - 1:
+        st.session_state.current_index += 1
+        st.experimental_rerun()
+
 
     search_term = st.text_input("🔍 Search in comments or rules:")
     filtered = df[df['text'].str.contains(search_term, case=False, na=False) | df['rule_text'].str.contains(search_term, case=False, na=False)] if search_term else df
