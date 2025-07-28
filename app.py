@@ -35,13 +35,17 @@ if 'annotator' not in st.session_state:
 # --- FILE UPLOAD ---
 uploaded_file = st.file_uploader("📄 Upload your comment-rule pairs CSV", type="csv")
 
-if uploaded_file:
+if uploaded_file and 'df' not in st.session_state:
     df = pd.read_csv(uploaded_file)
     if 'label' not in df.columns: df['label'] = None
     if 'flag' not in df.columns: df['flag'] = False
     if 'comment' not in df.columns: df['comment'] = ""
     if 'annotator' not in df.columns: df['annotator'] = ""
     if 'timestamp' not in df.columns: df['timestamp'] = ""
+    st.session_state.df = df
+
+if 'df' in st.session_state:
+    df = st.session_state.df
 
     search_term = st.text_input("🔍 Search in comments or rules:")
     filtered = df[df['text'].str.contains(search_term, case=False, na=False) | df['rule_text'].str.contains(search_term, case=False, na=False)] if search_term else df
@@ -70,12 +74,12 @@ if uploaded_file:
         df.at[row_index, 'comment'] = note
         df.at[row_index, 'annotator'] = st.session_state.annotator
         df.at[row_index, 'timestamp'] = datetime.datetime.now().isoformat()
+        st.session_state.df = df  # update stored df
         st.success("Saved successfully.")
 
-        # 🚀 Auto-advance to next index
         if st.session_state.current_index < len(filtered) - 1:
             st.session_state.current_index += 1
-            st.experimental_rerun()
+        st.experimental_rerun()
 
     csv = df.to_csv(index=False).encode('utf-8')
     st.download_button("📥 Download labeled data", csv, "labeled_output.csv", "text/csv")
