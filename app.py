@@ -2,24 +2,26 @@
 import streamlit as st
 import pandas as pd
 import gspread
+import json
 import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 
 st.set_page_config(page_title="Google Sheets Sync Labeling Tool", page_icon="favicon.png", layout="wide")
-
-st.title("Comment Rule Labeling Tool (Google Sheets Sync)")
+st.title("Comment Rule Labeling Tool (Google Sheets Sync via Secrets)")
 
 # Annotator login
 annotator = st.sidebar.text_input("Enter your name to begin:").strip().lower()
 if not annotator:
     st.stop()
 
-# Authenticate and connect to Google Sheet
+# Load credentials from Streamlit Secrets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("gspread_credentials.json", scope)
+gspread_dict = json.loads(st.secrets["gspread_credentials"])
+creds = ServiceAccountCredentials.from_json_keyfile_dict(gspread_dict, scope)
 client = gspread.authorize(creds)
 
-sheet = client.open("CommentAnnotations").sheet1  # Replace with your actual sheet name
+# Connect to Google Sheet
+sheet = client.open("CommentAnnotations").sheet1  # Adjust name if needed
 data = sheet.get_all_records()
 df = pd.DataFrame(data)
 
@@ -28,7 +30,7 @@ for col in ["label", "flag", "comment", "annotator", "timestamp"]:
     if col not in df.columns:
         df[col] = None if col == "label" else ""
 
-# Progress info
+# Progress tracking
 filtered = df[df["label"].isna()].reset_index(drop=True)
 total = len(df)
 completed = df["label"].notna().sum()
@@ -58,7 +60,6 @@ flag = st.checkbox("🚩 Flag this data?")
 comment = st.text_area("💬 Comment (optional)")
 
 if st.button("💾 Save"):
-    # Locate matching row in full df
     full_index = df[(df["rule_text"] == row["rule_text"]) & (df["text"] == row["text"])].index[0]
     df.at[full_index, "label"] = label
     df.at[full_index, "flag"] = flag
@@ -66,7 +67,6 @@ if st.button("💾 Save"):
     df.at[full_index, "annotator"] = annotator
     df.at[full_index, "timestamp"] = datetime.datetime.now().isoformat()
 
-    # Push updated row to Google Sheets
     sheet.update(f"C{full_index+2}", str(label))       # label
     sheet.update(f"D{full_index+2}", str(flag))        # flag
     sheet.update(f"E{full_index+2}", comment)          # comment
