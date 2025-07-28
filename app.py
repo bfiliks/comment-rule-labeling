@@ -6,7 +6,7 @@ import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 
 st.set_page_config(page_title="YouTube Comment Labeling Tool", page_icon="favicon.png", layout="wide")
-st.title("🧠 Comment Rule Labeling Tool (Google Sheets Sync)")
+st.title("Comment Rule Labeling Tool")
 
 # --- Sidebar instructions ---
 with st.sidebar.expander("📝 Annotator Instructions", expanded=True):
