@@ -8,7 +8,7 @@ import io
 st.set_page_config(page_title="Comment Rule Labeling Tool", page_icon="favicon.png", layout="wide")
 
 
-st.title("🧠 Multi-Annotator Comment Rule Labeling Tool")
+st.title("Multi-Annotator Comment Rule Labeling Tool")
 
 # Sidebar Instructions
 with st.sidebar.expander("📘 Annotator Instructions"):
