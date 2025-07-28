@@ -9,6 +9,39 @@ from oauth2client.service_account import ServiceAccountCredentials
 st.set_page_config(page_title="Google Sheets Sync Labeling Tool", page_icon="favicon.png", layout="wide")
 st.title("Comment Rule Labeling Tool")
 
+# Annotator Sidebar Instructions
+with st.sidebar.expander("📝 Annotator Instructions", expanded=True):
+    st.markdown("""
+    ### 👋 Welcome, Annotator!
+
+    Use this tool to **label** YouTube comments based on specific subreddit or community rules.
+
+    #### 📌 Steps to Begin:
+    1. **Enter your name** at login (this is recorded for auditing).
+    2. **Upload the CSV file** with rule-comment pairs.
+    3. For each pair:
+       - Assign a label:  
+         `0` → **Not Violating**  
+         `1` → **Violates Rule**
+       - Optionally check **🚩 Flag** if unsure.
+       - Leave a **comment** if helpful for others.
+    4. **Click “Save”** after labeling.
+    5. **Use the + / - buttons** (top center) to manually go to the **next or previous row**.
+
+    #### 📤 Export:
+    - Use **Download Labeled Data** at the bottom to save your work as a CSV.
+    - All changes are saved with:
+      - Your name
+      - Timestamp
+      - Optional flags and notes
+
+    ---
+    🔍 You can search keywords in rules or comments using the search bar.
+
+    🛠️ Need help? [Open an issue on GitHub](https://github.com/bfiliks/comment-rule-labeling/issues)
+    """)
+
+
 # Annotator login
 annotator = st.sidebar.text_input("Enter your name to begin:").strip().lower()
 if not annotator:
