@@ -100,11 +100,11 @@ if st.button("💾 Save"):
     df.at[full_index, "timestamp"] = datetime.datetime.now().isoformat()
 
     try:
-        sheet.update(f"C{full_index+2}", str(label))         # Label column
-        sheet.update(f"D{full_index+2}", str(flag))          # Flag column
-        sheet.update(f"E{full_index+2}", comment)            # Comment
-        sheet.update(f"F{full_index+2}", annotator)          # Annotator
-        sheet.update(f"G{full_index+2}", df.at[full_index, "timestamp"])  # Timestamp
+        sheet.update(f"C{full_index+2}:C{full_index+2}", [[str(label)]]) 
+        sheet.update(f"D{full_index+2}:D{full_index+2}", [[str(flag)]])
+        sheet.update(f"E{full_index+2}:E{full_index+2}", [[comment]])
+        sheet.update(f"F{full_index+2}:F{full_index+2}", [[annotator]])
+        sheet.update(f"G{full_index+2}:G{full_index+2}", [[df.at[full_index, "timestamp"]]])
         st.success("✅ Saved to Google Sheets!")
     except gspread.exceptions.APIError as e:
         st.error("❌ Failed to update Google Sheet. Check API limits or sheet structure.")
