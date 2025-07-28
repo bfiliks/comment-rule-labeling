@@ -8,7 +8,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 st.set_page_config(page_title="Google Sheets Sync Labeling Tool", page_icon="favicon.png", layout="wide")
 st.title("🧠 Comment Rule Labeling Tool (Google Sheets Sync)")
 
-# Sidebar instructions
+# --- Sidebar instructions ---
 with st.sidebar.expander("📝 Annotator Instructions", expanded=True):
     st.markdown("""
     ### 👋 Welcome, Annotator!
@@ -36,7 +36,7 @@ annotator = st.sidebar.text_input("Enter your name to begin:").strip().lower()
 if not annotator:
     st.stop()
 
-# --- Google Sheets Auth via Streamlit Secrets ---
+# --- Google Sheets Auth ---
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 gspread_dict = json.loads(st.secrets["gspread_credentials"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(gspread_dict, scope)
@@ -52,44 +52,47 @@ for col in ["label", "flag", "comment", "annotator", "timestamp"]:
     if col not in df.columns:
         df[col] = "" if col != "label" else ""
 
-# --- Progress tracking (based on label column only) ---
+# --- Progress tracking ---
 total = len(df)
-completed = df["label"].notna().sum()
+completed = df["label"].apply(lambda x: x != "").sum()
 progress = completed / total if total else 0
 
 st.progress(progress)
 st.markdown(f"**Overall Progress:** {completed} / {total} labeled")
 
-# Optional: Per-annotator progress
-if annotator:
-    personal_completed = df[(df["annotator"] == annotator) & (df["label"].notna())].shape[0]
-    st.markdown(f"👤 **Your Progress:** {personal_completed} comments labeled")
+# Per-annotator progress
+personal_completed = df[(df["annotator"] == annotator) & (df["label"] != "")].shape[0]
+st.markdown(f"👤 **Your Progress:** {personal_completed} comments labeled")
 
-# --- Check for Completion ---
+# --- Filter unlabeled rows ---
+filtered = df[df["label"] == ""].reset_index(drop=True)
+
+# --- Check if all done ---
 if filtered.empty:
     st.success("🎉 All comments have been labeled!")
     st.stop()
 
-# --- Navigation State ---
+# --- Navigation state ---
 if "current_index" not in st.session_state:
     st.session_state.current_index = 0
 
 index = st.number_input("Index", min_value=0, max_value=len(filtered)-1, value=st.session_state.current_index)
 st.session_state.current_index = index
+
 row = filtered.iloc[index]
 
-# --- Display Rule + Comment ---
+# --- Display rule and comment ---
 st.subheader("📌 Rule")
 st.info(row["rule_text"])
 st.subheader("💬 Comment")
 st.warning(row["text"])
 
-# --- Label Interface ---
+# --- Input fields ---
 label = st.radio("Label", [0, 1], horizontal=True)
 flag = st.checkbox("🚩 Flag this data?")
 comment = st.text_area("💬 Comment (optional)")
 
-# --- Save Annotation ---
+# --- Save button ---
 if st.button("💾 Save"):
     match = df[(df["rule_text"] == row["rule_text"]) & (df["text"] == row["text"])]
 
