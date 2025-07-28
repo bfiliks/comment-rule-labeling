@@ -1,0 +1,3 @@
+text,rule_id,rule_text,input,label
+"This is terrible!",1,No hate speech,"No hate speech [SEP] This is terrible!",,
+"Thank you for sharing",2,No personal attacks,"No personal attacks [SEP] Thank you for sharing",,
