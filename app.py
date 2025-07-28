@@ -19,7 +19,7 @@ if 'annotator' not in st.session_state:
     st.stop()
 
 # --- FILE UPLOAD ---
-st.title("🧠 Comment Rule Labeling Tool (w/ Metadata)")
+# st.title("🧠 Comment Rule Labeling Tool (w/ Metadata)")
 uploaded_file = st.file_uploader("📄 Upload your comment-rule pairs CSV", type="csv")
 
 if uploaded_file:
