@@ -1,6 +1,46 @@
 ![Banner](./assets/streamlit_banner.png)
 
-# Comment Rule Labeling Tool
+# 🧠 Comment Rule Labeling Tool
+
+[![Streamlit App](https://img.shields.io/badge/Live%20Demo-Streamlit-ff4b4b?logo=streamlit&logoColor=white)](https://comment-rule-labeling.streamlit.app/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org/)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](CONTRIBUTING.md)
+[![Issues](https://img.shields.io/github/issues/bfiliks/comment-rule-labeling)](https://github.com/bfiliks/comment-rule-labeling/issues)
+
+> A collaborative tool for labeling Reddit/YouTube comments based on subreddit or community rules. Built with **Streamlit** and **Google Sheets Sync** to enable multiple annotators to work remotely without duplication.
+
+---
+
+## 🚀 Live App
+
+🌐 [Click here to try the live app](https://comment-rule-labeling.streamlit.app/)
+
+---
+
+## 🖼️ Features
+
+- 🔐 Annotator login with name tracking
+- 🗂️ Google Sheets-based collaborative annotation
+- 🏷️ Binary labeling (0 = Not violating, 1 = Violates rule)
+- 🏁 Flag uncertain examples
+- 💬 Leave optional notes per annotation
+- 📈 Live progress tracker (overall + per user)
+- 🔎 Keyword search to filter comment/rule pairs
+- ➕/- Manual navigation controls
+
+---
+
+## 📁 Folder Structure
+
+```bash
+.
+├── app.py                    # Main Streamlit App
+├── requirements.txt          # Python dependencies
+├── .streamlit/
+│   └── config.toml           # Streamlit config for favicon, theme
+└── README.md                 # This file
+
 
 A Streamlit-based app to label YouTube comments against community rules. Includes:
 - Binary labels (0 = OK, 1 = Violation)
