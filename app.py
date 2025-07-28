@@ -52,13 +52,18 @@ for col in ["label", "flag", "comment", "annotator", "timestamp"]:
     if col not in df.columns:
         df[col] = "" if col != "label" else ""
 
-# --- Progress ---
-filtered = df[(df["label"].isna()) | (df["label"] == "")].reset_index(drop=True)
+# --- Progress tracking (based on label column only) ---
 total = len(df)
-completed = df["label"].notna().sum() + df["label"].apply(lambda x: str(x).strip() != "").sum()
+completed = df["label"].notna().sum()
 progress = completed / total if total else 0
+
 st.progress(progress)
-st.markdown(f"**Progress:** {completed} / {total} labeled")
+st.markdown(f"**Overall Progress:** {completed} / {total} labeled")
+
+# Optional: Per-annotator progress
+if annotator:
+    personal_completed = df[(df["annotator"] == annotator) & (df["label"].notna())].shape[0]
+    st.markdown(f"👤 **Your Progress:** {personal_completed} comments labeled")
 
 # --- Check for Completion ---
 if filtered.empty:
