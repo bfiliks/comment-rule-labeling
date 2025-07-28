@@ -74,11 +74,17 @@ if 'df' in st.session_state:
         df.at[row_index, 'comment'] = note
         df.at[row_index, 'annotator'] = st.session_state.annotator
         df.at[row_index, 'timestamp'] = datetime.datetime.now().isoformat()
-        st.session_state.df = df  # update stored df
+        st.session_state.df = df
         st.success("Saved successfully.")
 
+        # 🚀 Mark rerun for next session step
         if st.session_state.current_index < len(filtered) - 1:
             st.session_state.current_index += 1
+            st.session_state.rerun_needed = True
+
+    # ✅ Trigger rerun only if explicitly marked
+    if st.session_state.get("rerun_needed"):
+        st.session_state.rerun_needed = False
         st.experimental_rerun()
 
     csv = df.to_csv(index=False).encode('utf-8')
