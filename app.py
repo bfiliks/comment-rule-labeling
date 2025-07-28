@@ -4,11 +4,9 @@ import pandas as pd
 import datetime
 import io
 
-# st.set_page_config(page_title="Multi-Annotator Comment Rule Labeling Tool", page_icon="🧠", layout="wide")
-st.set_page_config(page_title="Comment Rule Labeling Tool", page_icon="favicon.png", layout="wide")
+st.set_page_config(page_title="Multi-Annotator Comment Rule Labeling Tool", page_icon="🧠", layout="wide")
 
-
-st.title("Multi-Annotator Comment Rule Labeling Tool")
+st.title("🧠 Multi-Annotator Comment Rule Labeling Tool")
 
 # Sidebar Instructions
 with st.sidebar.expander("📘 Annotator Instructions"):
@@ -77,7 +75,7 @@ if 'df' in st.session_state:
         note = st.text_area("💬 Comment (optional)")
 
         if st.button("💾 Save"):
-            full_index = df[(df['rule_text'] == row['rule_text']) & (df['comment_text'] == row['comment_text'])].index[0]
+            full_index = df[(df['rule_text'] == row['rule_text']) & (df['text'] == row['text'])].index[0]
             df.at[full_index, f'label_{annotator}'] = label
             df.at[full_index, f'flag_{annotator}'] = flag
             df.at[full_index, f'comment_{annotator}'] = note
