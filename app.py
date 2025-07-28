@@ -5,10 +5,10 @@ import json
 import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 
-st.set_page_config(page_title="YouTube Comment Labeling Tool", page_icon="favicon.png", layout="wide")
-st.title("Comment Rule Labeling Tool")
+st.set_page_config(page_title="Google Sheets Sync Labeling Tool", page_icon="favicon.png", layout="wide")
+st.title("🧠 Comment Rule Labeling Tool (Google Sheets Sync)")
 
-# --- Sidebar instructions ---
+# Sidebar instructions
 with st.sidebar.expander("📝 Annotator Instructions", expanded=True):
     st.markdown("""
     ### 👋 Welcome, Annotator!
@@ -25,77 +25,83 @@ with st.sidebar.expander("📝 Annotator Instructions", expanded=True):
        - Leave a **comment** if helpful for others.
     3. **Click “Save”** after labeling.
     4. **Use the + / - buttons** (top center) to manually go to the **next or previous row**.
+    5. **Use the search bar** to filter by rule or comment keywords.
 
     ---
     🔍 You can search keywords in rules or comments using the search bar.
     🛠️ Need help? [Open an issue on GitHub](https://github.com/bfiliks/comment-rule-labeling/issues)
     """)
 
-# --- Annotator Login ---
+# Annotator login
 annotator = st.sidebar.text_input("Enter your name to begin:").strip().lower()
 if not annotator:
     st.stop()
 
-# --- Google Sheets Auth ---
+# Google Sheets auth via secrets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 gspread_dict = json.loads(st.secrets["gspread_credentials"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(gspread_dict, scope)
 client = gspread.authorize(creds)
 
-# --- Load Google Sheet ---
+# Load Google Sheet
 sheet = client.open("CommentAnnotations").sheet1
 data = sheet.get_all_records()
 df = pd.DataFrame(data)
 
-# --- Ensure required columns exist ---
+# Ensure required columns exist
 for col in ["label", "flag", "comment", "annotator", "timestamp"]:
     if col not in df.columns:
         df[col] = "" if col != "label" else ""
 
-# --- Progress tracking ---
+# Keyword search (before filtering)
+search_term = st.text_input("🔍 Search comments or rules for a keyword (optional):").strip().lower()
+if search_term:
+    df = df[
+        df["rule_text"].str.lower().str.contains(search_term) |
+        df["text"].str.lower().str.contains(search_term)
+    ]
+
+# Filter unlabeled only
+filtered = df[df["label"] == ""].reset_index(drop=True)
+
+# Progress tracking
 total = len(df)
-completed = df["label"].apply(lambda x: x != "").sum()
+completed = df["label"].astype(str).str.strip().replace("", pd.NA).notna().sum()
 progress = completed / total if total else 0
 
 st.progress(progress)
 st.markdown(f"**Overall Progress:** {completed} / {total} labeled")
 
-# Per-annotator progress
-personal_completed = df[(df["annotator"] == annotator) & (df["label"] != "")].shape[0]
-st.markdown(f"👤 **Your Progress:** {personal_completed} comments labeled")
+if annotator:
+    personal_completed = df[(df["annotator"] == annotator) & (df["label"].astype(str).str.strip() != "")].shape[0]
+    st.markdown(f"👤 **Your Progress:** {personal_completed} comments labeled")
 
-# --- Filter unlabeled rows ---
-filtered = df[df["label"] == ""].reset_index(drop=True)
-
-# --- Check if all done ---
 if filtered.empty:
     st.success("🎉 All comments have been labeled!")
     st.stop()
 
-# --- Navigation state ---
+# Navigation
 if "current_index" not in st.session_state:
     st.session_state.current_index = 0
 
 index = st.number_input("Index", min_value=0, max_value=len(filtered)-1, value=st.session_state.current_index)
 st.session_state.current_index = index
-
 row = filtered.iloc[index]
 
-# --- Display rule and comment ---
+# Show rule and comment
 st.subheader("📌 Rule")
 st.info(row["rule_text"])
 st.subheader("💬 Comment")
 st.warning(row["text"])
 
-# --- Input fields ---
+# Label form
 label = st.radio("Label", [0, 1], horizontal=True)
 flag = st.checkbox("🚩 Flag this data?")
 comment = st.text_area("💬 Comment (optional)")
 
-# --- Save button ---
+# Save
 if st.button("💾 Save"):
     match = df[(df["rule_text"] == row["rule_text"]) & (df["text"] == row["text"])]
-
     if match.empty:
         st.error("❌ Could not find the corresponding row in the Google Sheet.")
         st.stop()
@@ -108,7 +114,7 @@ if st.button("💾 Save"):
     df.at[full_index, "timestamp"] = datetime.datetime.now().isoformat()
 
     try:
-        sheet.update(f"C{full_index+2}:C{full_index+2}", [[str(label)]]) 
+        sheet.update(f"C{full_index+2}:C{full_index+2}", [[str(label)]])
         sheet.update(f"D{full_index+2}:D{full_index+2}", [[str(flag) if flag else ""]])
         sheet.update(f"E{full_index+2}:E{full_index+2}", [[comment]])
         sheet.update(f"F{full_index+2}:F{full_index+2}", [[annotator]])
