@@ -70,7 +70,7 @@ if 'df' in st.session_state:
         st.info(row['rule_text'])
 
         st.subheader("💬 Comment")
-        st.warning(row['comment_text'])
+        st.warning(row['text'])
 
         label = st.radio("Label", [0, 1], horizontal=True)
         flag = st.checkbox("🚩 Flag this data?")
