@@ -11,7 +11,7 @@ import datetime
 
 st.set_page_config(page_title="Comment Rule Labeling Tool", layout="wide")
 
-st.title("🧠 Comment Rule Labeling Tool")
+# st.title("🧠 Comment Rule Labeling Tool")
 
 # 👋 Welcome Message
 st.markdown("""
