@@ -84,10 +84,6 @@ if 'df' in st.session_state:
         st.session_state.df = df
         st.success("Saved successfully.")
 
-        if st.session_state.current_index < len(filtered) - 1:
-            st.session_state.current_index += 1
-            st.experimental_rerun()
-
     csv = df.to_csv(index=False).encode('utf-8')
     st.download_button("📥 Download labeled data", csv, "labeled_output.csv", "text/csv")
 
