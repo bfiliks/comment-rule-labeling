@@ -1,7 +1,5 @@
 ![Banner](./assets/streamlit_banner.png)
 
-# 🧠 Comment Rule Labeling Tool
-
 [![Streamlit App](https://img.shields.io/badge/Live%20Demo-Streamlit-ff4b4b?logo=streamlit&logoColor=white)](https://comment-rule-labeling.streamlit.app/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org/)
