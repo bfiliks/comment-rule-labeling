@@ -11,6 +11,28 @@ import datetime
 
 st.set_page_config(page_title="Comment Rule Labeling Tool", layout="wide")
 
+st.title("🧠 Comment Rule Labeling Tool")
+
+# 👋 Welcome Message
+st.markdown("""
+### 👋 Welcome, Annotators!
+
+This tool helps you **label, flag, and comment on YouTube comments** based on specific community rules.
+
+Please follow the steps below to begin:
+1. **Enter your annotator name** when prompted (this helps log your inputs).
+2. **Upload your CSV file** containing paired *rules* and *comments*.
+3. For each comment:
+   - Assign a **label**: `0` (not violating) or `1` (violates the rule).
+   - Optionally **flag** uncertain cases and leave a **note** for review.
+4. Use the **“Download Labeled Data”** button to export your progress.
+
+---
+
+Need help? Reach out to the team or [open an issue](https://github.com/bfiliks/comment-rule-labeling/issues).
+""")
+
+
 # --- USER LOGIN ---
 # Annotator Login
 if 'annotator' not in st.session_state:
