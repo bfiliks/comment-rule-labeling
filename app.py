@@ -62,7 +62,7 @@ st.progress(progress)
 st.markdown(f"**Progress:** {completed} / {total} labeled")
 
 # --- Filter for unlabeled rows ---
-filtered = df[df["label"].isna()].reset_index(drop=True)
+filtered = df[(df["label"] == "") | (df["label"].isna())].reset_index(drop=True)
 if filtered.empty:
     st.success("🎉 All comments have been labeled!")
     st.stop()
