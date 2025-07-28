@@ -85,8 +85,15 @@ if 'df' in st.session_state:
         st.session_state.df = df
         st.success("Saved successfully.")
 
+    # --- PROGRESS BAR ---
+    total = len(df)
+    completed = df['label'].notna().sum()
+    progress = completed / total if total > 0 else 0
+    st.progress(progress)
+    st.markdown(f"**Progress:** {completed} out of {total} labeled ({progress:.0%})")
+
     csv = df.to_csv(index=False).encode('utf-8')
     st.download_button("📥 Download labeled data", csv, "labeled_output.csv", "text/csv")
 
     st.markdown("---")
-    st.write(f"✅ Labeled: {df['label'].notna().sum()} / {len(df)}")
+    st.write(f"✅ Labeled: {completed} / {total}")
