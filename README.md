@@ -8,7 +8,7 @@
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](CONTRIBUTING.md)
 [![Issues](https://img.shields.io/github/issues/bfiliks/comment-rule-labeling)](https://github.com/bfiliks/comment-rule-labeling/issues)
 
-> A collaborative tool for labeling Reddit/YouTube comments based on subreddit or community rules. Built with **Streamlit** and **Google Sheets Sync** to enable multiple annotators to work remotely without duplication.
+> A collaborative tool for labeling YouTube comments based on YouTube community rules. Built with **Streamlit** and **Google Sheets Sync** to enable multiple annotators to work remotely without duplication.
 
 ---
 
