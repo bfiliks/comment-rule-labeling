@@ -6,7 +6,9 @@ import datetime
 st.set_page_config(page_title="Comment Rule Labeling Tool", layout="wide")
 
 # --- USER LOGIN ---
+# Annotator Login
 if 'annotator' not in st.session_state:
+    st.sidebar.markdown("[🔗 View on GitHub](https://github.com/bfiliks/comment-rule-labeling)")
     st.session_state.annotator = st.text_input("Enter your annotator name to begin:")
     st.stop()
 
