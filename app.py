@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import datetime
+import io
 
 st.set_page_config(page_title="Comment Rule Labeling Tool", page_icon="favicon.png", layout="wide")
 
@@ -35,8 +36,13 @@ if 'annotator' not in st.session_state:
 # --- FILE UPLOAD ---
 uploaded_file = st.file_uploader("📄 Upload your comment-rule pairs CSV", type="csv")
 
-if uploaded_file and 'df' not in st.session_state:
-    df = pd.read_csv(uploaded_file)
+# --- CACHE CSV CONTENT ---
+if uploaded_file and 'csv_data' not in st.session_state:
+    st.session_state.csv_data = uploaded_file.read()
+
+# --- LOAD INTO DATAFRAME ONCE ---
+if 'csv_data' in st.session_state and 'df' not in st.session_state:
+    df = pd.read_csv(io.StringIO(st.session_state.csv_data.decode("utf-8")))
     if 'label' not in df.columns: df['label'] = None
     if 'flag' not in df.columns: df['flag'] = False
     if 'comment' not in df.columns: df['comment'] = ""
@@ -44,6 +50,7 @@ if uploaded_file and 'df' not in st.session_state:
     if 'timestamp' not in df.columns: df['timestamp'] = ""
     st.session_state.df = df
 
+# --- MAIN ANNOTATION TOOL ---
 if 'df' in st.session_state:
     df = st.session_state.df
 
@@ -77,15 +84,9 @@ if 'df' in st.session_state:
         st.session_state.df = df
         st.success("Saved successfully.")
 
-        # 🚀 Mark rerun for next session step
         if st.session_state.current_index < len(filtered) - 1:
             st.session_state.current_index += 1
-            st.session_state.rerun_needed = True
-
-    # ✅ Trigger rerun only if explicitly marked
-    if st.session_state.get("rerun_needed"):
-        st.session_state.rerun_needed = False
-        st.experimental_rerun()
+            st.experimental_rerun()
 
     csv = df.to_csv(index=False).encode('utf-8')
     st.download_button("📥 Download labeled data", csv, "labeled_output.csv", "text/csv")
