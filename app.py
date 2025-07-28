@@ -5,7 +5,7 @@ import gspread
 import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 
-st.set_page_config(page_title="Google Sheets Sync Labeling Tool", layout="wide")
+st.set_page_config(page_title="Google Sheets Sync Labeling Tool", page_icon="favicon.png", layout="wide")
 
 st.title("Comment Rule Labeling Tool (Google Sheets Sync)")
 
