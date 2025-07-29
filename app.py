@@ -13,7 +13,7 @@ with st.sidebar.expander("📝 Annotator Instructions", expanded=True):
     st.markdown("""
     ### 👋 Welcome, Annotator!
 
-    Use this tool to **label** YouTube comments based on specific subreddit or community rules.
+    Use this tool to **label** YouTube comments based on specific community rules.
 
     #### 📌 Steps to Begin:
     1. **Enter your name** at login (this is recorded for auditing).
